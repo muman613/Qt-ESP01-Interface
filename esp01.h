@@ -7,6 +7,12 @@
 
 using SerialPortList = QList<QSerialPortInfo>;
 
+enum state {
+    DISCONNECTED,
+    IDLE,
+    WAIT_RESULT,
+};
+
 class ESP01 : public QObject
 {
     Q_OBJECT
@@ -18,18 +24,25 @@ public:
 
     bool    open(QString portName = QString());
     void    close();
+    bool    isOpen() const;
 
-    bool    sendCommand(QString cmd, QStringList & result);
+    void    sendCommand(QString cmd);
 
 signals:
+    void    commandResponse(bool status, QStringList response);
 
 public slots:
+    void onReadyRead();
 
 protected:
     QString         serPortName;
     QSerialPort     serPort;
-
+    bool            cmdSent = false;
+    enum state      curState = DISCONNECTED;
     bool            configurePort();
+
+    QString         replyLineBuffer;
+    QStringList     response;
 };
 
 

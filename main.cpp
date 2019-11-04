@@ -12,7 +12,7 @@
 
 #include "utilities.h"
 #include "esp01.h"
-
+#include "commobject.h"
 
 static QStringList commandList = {
     "AT",
@@ -27,23 +27,21 @@ static QStringList commandList = {
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    ESP01       esp01;
+    CommObject commObj(&a);
 
-    if (esp01.open()) {
-        for (QString command : commandList) {
-            QStringList result;
+    if (commObj.open()) {
+        qDebug() << "Commobject is open";
 
-            if (esp01.sendCommand(command, result)) {
-                displayResults(result);
+        for (auto cmd : commandList) {
+            QStringList cmdResponse;
+
+            if (commObj.atCommand(cmd, &cmdResponse) == 0) {
+                displayResults(cmdResponse);
             } else {
-                printf("ERROR: Command '%s' failed\n",
-                       command.toLocal8Bit().data());
+                qDebug() << "ERROR on command " << cmd;
             }
         }
     }
-    esp01.close();
-
-    qDebug() << "DONE";
 
     return a.exec();
 }
