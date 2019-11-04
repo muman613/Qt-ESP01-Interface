@@ -45,6 +45,15 @@ bool CommObject::open(QString portName)
     return result;
 }
 
+void CommObject::close()
+{
+    if (esp01) {
+        esp01->close();
+        delete esp01;
+        esp01 = nullptr;
+    }
+}
+
 int CommObject::atCommand(QString command, QStringList * response)
 {
 //    qDebug() << Q_FUNC_INFO << command;

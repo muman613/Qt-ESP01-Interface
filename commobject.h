@@ -24,6 +24,7 @@ public:
     bool        isPending() const;
 
     bool        open(QString portName = QString());
+    void        close();
     int         atCommand(QString command, QStringList * response = nullptr);
 
 signals:

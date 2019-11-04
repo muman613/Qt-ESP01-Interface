@@ -43,5 +43,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    commObj.close();
+
     return a.exec();
 }
