@@ -17,17 +17,25 @@ enum commState {
 class CommObject : public QObject
 {
     Q_OBJECT
+
 public:
-    explicit CommObject(QObject *parent = nullptr);
+    explicit    CommObject(QObject *parent = nullptr);
+    virtual     ~CommObject();
 
     bool        isOpen() const;
     bool        isPending() const;
 
     bool        open(QString portName = QString());
     void        close();
+
     int         atCommand(QString command, QStringList * response = nullptr);
 
-    void        GetVersion(QString & atVersion, QString & sdkVersion, QString & compileTime);
+    QString     getSerialPort() const;
+    void        getVersion(QString & atVersion,
+                           QString & sdkVersion,
+                           QString & compileTime);
+    int         getMode();
+    void        setMode();
 
 signals:
 
@@ -43,6 +51,8 @@ protected:
     enum commState state = COMM_UNINIT;
 
     QMutex                  commMutex;
+    QString                 serialPort;
+    QString                 defaultPort;
     bool                    bCmdResult        = false;
     QStringList             responseArray;
     QAtomicInteger<bool>    bResponseReceived = false;

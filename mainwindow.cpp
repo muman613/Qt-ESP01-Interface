@@ -1,5 +1,6 @@
 #include <QDebug>
 #include "mainwindow.h"
+#include "portdialog.h"
 #include "ui_mainwindow.h"
 #include "commobject.h"
 
@@ -24,29 +25,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     pComObject = new CommObject(this);
-
     pComObject->open();
-
-    if (pComObject->isOpen()) {
-        qDebug() << "CommObject is open!";
-
-        for (auto cmd : commandList) {
-            ui->command->addItem(cmd);
-        }
-
-        pComObject->GetVersion(versionInfo[0], versionInfo[1], versionInfo[2]);
-
-        QString sMesg = QString("AT Version = %1").arg(versionInfo[0]);
-
-        ui->textBox->append(sMesg);
-
-    } else {
-        ui->command->setEnabled(false);
-        ui->execute->setEnabled(false);
-        ui->textBox->setEnabled(false);
-
-        ui->textBox->append("Unable to open comm device");
-    }
+    updateConnection();
 }
 
 MainWindow::~MainWindow()
@@ -71,4 +51,58 @@ void MainWindow::on_execute_clicked()
         QString status = QString("Error sending command '%1'").arg(command);
         ui->textBox->append(status);
     }
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    close();
+}
+
+void MainWindow::on_actionSelect_serial_device_triggered()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    portDialog  portDlg(this, pComObject->getSerialPort());
+
+    if (portDlg.exec() == QDialog::Accepted) {
+        QString serPort =  portDlg.getPort();
+
+        qDebug() << "User selected port " << serPort;
+
+        pComObject->close();
+        pComObject->open(serPort);
+        updateConnection();
+    }
+}
+
+void MainWindow::updateConnection() {
+//    qDebug() << Q_FUNC_INFO;
+
+    if (pComObject->isOpen()) {
+        qDebug() << "CommObject is open!";
+
+        for (auto cmd : commandList) {
+            ui->command->addItem(cmd);
+        }
+
+        pComObject->getVersion(versionInfo[0], versionInfo[1], versionInfo[2]);
+
+        QString sMesg = QString("AT Version = %1").arg(versionInfo[0]);
+
+        ui->textBox->append(sMesg);
+
+        int mode = pComObject->getMode();
+        qDebug() << "mode = " << mode;
+
+        ui->command->setEnabled(true);
+        ui->execute->setEnabled(true);
+        ui->textBox->setEnabled(true);
+    } else {
+        ui->command->setEnabled(false);
+        ui->execute->setEnabled(false);
+        ui->textBox->setEnabled(false);
+
+        ui->textBox->append("Unable to open comm device");
+    }
+
 }

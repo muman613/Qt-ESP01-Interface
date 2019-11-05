@@ -19,6 +19,7 @@ SOURCES += \
         esp01.cpp \
         main.cpp \
         mainwindow.cpp \
+        portdialog.cpp \
         utilities.cpp
 
 # Default rules for deployment.
@@ -30,7 +31,9 @@ HEADERS += \
     commobject.h \
     esp01.h \
     mainwindow.h \
+    portdialog.h \
     utilities.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    portdialog.ui

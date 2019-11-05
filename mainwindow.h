@@ -20,7 +20,13 @@ public:
 private slots:
     void on_execute_clicked();
 
+    void on_actionExit_triggered();
+
+    void on_actionSelect_serial_device_triggered();
+
 private:
+    void updateConnection();
+
     Ui::MainWindow *ui;
 
     CommObject * pComObject = nullptr;

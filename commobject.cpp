@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QMutexLocker>
 #include <QThread>
+#include <QSettings>
 #include "commobject.h"
 #include "utilities.h"
 
@@ -10,10 +11,30 @@ CommObject::CommObject(QObject *parent)
     : QObject(parent),
       commMutex(QMutex::Recursive)
 {
+    // Get default comm port
+    QSettings settings(this);
+
+    if (settings.status() == QSettings::NoError) {
+        settings.beginGroup("wifi");
+        defaultPort = settings.value("port", QVariant::fromValue(QString(""))).toString();
+        settings.endGroup();
+    }
+
 #ifdef ENABLE_TIMER
     connect(&timer1, &QTimer::timeout, this, &CommObject::onTimeout);
     timer1.start(5000);
 #endif
+}
+
+CommObject::~CommObject()
+{
+    // Save port setting
+    QSettings settings(this);
+    if (settings.status() == QSettings::NoError) {
+        settings.beginGroup("wifi");
+        settings.setValue("port", QVariant::fromValue(serialPort));
+        settings.endGroup();
+    }
 }
 
 bool CommObject::isOpen() const
@@ -30,17 +51,21 @@ bool CommObject::isOpen() const
 bool CommObject::open(QString portName)
 {
     if (esp01 != nullptr) {
-        delete esp01;
-        esp01 = nullptr;
+        close();
     }
 
     esp01 = new ESP01(this);
-    bool result =  esp01->open(portName);
-    if (result) {
-        connect(esp01, &ESP01::commandResponse, this, &CommObject::onCommandResponse);
+
+    // If user did not pass portName, use the deaultPort
+    if (portName.isEmpty()) {
+        portName = defaultPort;
     }
 
-//    atCommand("AT+GMR");
+    bool result =  esp01->open(portName);
+    if (result) {
+        serialPort = portName;
+        connect(esp01, &ESP01::commandResponse, this, &CommObject::onCommandResponse);
+    }
 
     return result;
 }
@@ -48,6 +73,8 @@ bool CommObject::open(QString portName)
 void CommObject::close()
 {
     if (esp01) {
+        disconnect(esp01, &ESP01::commandResponse, this, &CommObject::onCommandResponse);
+
         esp01->close();
         delete esp01;
         esp01 = nullptr;
@@ -89,7 +116,11 @@ int CommObject::atCommand(QString command, QStringList * response)
     return result;
 }
 
-void CommObject::GetVersion(QString &atVersion, QString &sdkVersion, QString &compileTime)
+QString CommObject::getSerialPort() const {
+    return serialPort;
+}
+
+void CommObject::getVersion(QString &atVersion, QString &sdkVersion, QString &compileTime)
 {
     if (isOpen()) {
         QStringList response;
@@ -99,11 +130,29 @@ void CommObject::GetVersion(QString &atVersion, QString &sdkVersion, QString &co
             atVersion = response[1].section(':', 1);
             sdkVersion = response[2].section(':', 1);
             compileTime = response[3].section(':', 1);
-//            atVersion = response[1].split(":")[1];
-//            sdkVersion = response[2].split(":")[1];
-//            compileTime = response[3].split(":")[1];
         }
     }
+}
+
+int CommObject::getMode()
+{
+    int mode = 0;
+
+    if (isOpen()) {
+        QStringList response;
+
+        if (atCommand("AT+CWMODE?", &response) == 0) {
+            qDebug() << response;
+            mode = response[1].section(':', 1).toInt();
+        }
+    }
+
+    return mode;
+}
+
+void CommObject::setMode()
+{
+
 }
 
 void CommObject::onCommandResponse(bool status, QStringList response)
