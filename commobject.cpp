@@ -89,6 +89,23 @@ int CommObject::atCommand(QString command, QStringList * response)
     return result;
 }
 
+void CommObject::GetVersion(QString &atVersion, QString &sdkVersion, QString &compileTime)
+{
+    if (isOpen()) {
+        QStringList response;
+
+        if (atCommand("AT+GMR", &response) == 0) {
+            qDebug() << response;
+            atVersion = response[1].section(':', 1);
+            sdkVersion = response[2].section(':', 1);
+            compileTime = response[3].section(':', 1);
+//            atVersion = response[1].split(":")[1];
+//            sdkVersion = response[2].split(":")[1];
+//            compileTime = response[3].split(":")[1];
+        }
+    }
+}
+
 void CommObject::onCommandResponse(bool status, QStringList response)
 {
     QMutexLocker lock(&commMutex);

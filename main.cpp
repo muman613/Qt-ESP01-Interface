@@ -3,7 +3,7 @@
 //  PURPOSE :   Sending AT commands to the ESP01 serial device.
 //----------------------------------------------------------------------------
 
-#include <QCoreApplication>
+#include <QApplication>
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QObject>
@@ -11,22 +11,33 @@
 #include <QDebug>
 
 #include "utilities.h"
+#include "mainwindow.h"
 #include "esp01.h"
 #include "commobject.h"
 
-static QStringList commandList = {
-    "AT",
-    "AT+CIFSR",
-    "AT+CWJAP?",
-    "AT+GMR",
-    "AT+CIPSTATUS",
-    "AT+CWLAP",
-    "ATS"
-};
+//static QStringList commandList = {
+//    "AT",
+//    "AT+CIFSR",
+//    "AT+CWJAP?",
+//    "AT+GMR",
+//    "AT+CIPSTATUS",
+//    "AT+CWLAP",
+//    "ATS"
+//};
+
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+    return a.exec();
+}
+
+#if 0
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
     CommObject commObj(&a);
 
     if (commObj.open()) {
@@ -47,3 +58,4 @@ int main(int argc, char *argv[])
 
     return a.exec();
 }
+#endif

@@ -27,6 +27,8 @@ public:
     void        close();
     int         atCommand(QString command, QStringList * response = nullptr);
 
+    void        GetVersion(QString & atVersion, QString & sdkVersion, QString & compileTime);
+
 signals:
 
 public slots:

@@ -1,8 +1,7 @@
-QT -= gui
-QT += core serialport
+QT       += core gui serialport
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++11 console
-CONFIG -= app_bundle
+CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -19,6 +18,7 @@ SOURCES += \
         commobject.cpp \
         esp01.cpp \
         main.cpp \
+        mainwindow.cpp \
         utilities.cpp
 
 # Default rules for deployment.
@@ -29,4 +29,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     commobject.h \
     esp01.h \
+    mainwindow.h \
     utilities.h
+
+FORMS += \
+    mainwindow.ui
