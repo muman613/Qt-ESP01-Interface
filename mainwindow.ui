@@ -18,7 +18,11 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QComboBox" name="command"/>
+       <widget class="QComboBox" name="command">
+        <property name="toolTip">
+         <string>Select command to execute</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="execute">
@@ -31,6 +35,11 @@
     </item>
     <item>
      <widget class="QTextEdit" name="textBox">
+      <property name="font">
+       <font>
+        <family>Courier 10 Pitch</family>
+       </font>
+      </property>
       <property name="readOnly">
        <bool>true</bool>
       </property>
@@ -44,7 +53,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -52,6 +61,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionSelect_serial_device"/>
+    <addaction name="actionEnumerate_serial_devices"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -66,6 +76,11 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionEnumerate_serial_devices">
+   <property name="text">
+    <string>Enumerate serial devices</string>
    </property>
   </action>
  </widget>

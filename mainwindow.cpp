@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <QSerialPort>
+#include <QSerialPortInfo>
 #include "mainwindow.h"
 #include "portdialog.h"
 #include "ui_mainwindow.h"
@@ -15,6 +17,7 @@ static QStringList commandList = {
     "AT+CWMODE=2",
     "AT+CWMODE=3",
     "AT+CWMODE?",
+    "AT+PING=\"sfgate.com\"",
     "ATS"
 };
 
@@ -105,4 +108,21 @@ void MainWindow::updateConnection() {
         ui->textBox->append("Unable to open comm device");
     }
 
+}
+
+void MainWindow::on_actionEnumerate_serial_devices_triggered()
+{
+    auto serialPorts = QSerialPortInfo::availablePorts();
+
+    ui->textBox->append(QString("%1 %2 %3").arg("Port Name", -15).arg("Description", -30).arg("Manufacturer", -20));
+
+    ui->textBox->append(QString(80, '-'));
+
+    for (auto port : serialPorts) {
+        QString line;
+
+        line = QString("%1 %2 %3").arg(port.portName(), -15).arg(port.description(), -30).arg(port.manufacturer(), -20);
+
+        ui->textBox->append(line);
+    }
 }

@@ -24,6 +24,8 @@ private slots:
 
     void on_actionSelect_serial_device_triggered();
 
+    void on_actionEnumerate_serial_devices_triggered();
+
 private:
     void updateConnection();
 
