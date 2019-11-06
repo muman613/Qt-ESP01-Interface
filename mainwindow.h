@@ -28,6 +28,7 @@ private slots:
 
 private:
     void updateConnection();
+    void enableControls(bool bEnable);
 
     Ui::MainWindow *ui;
 

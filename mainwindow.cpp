@@ -79,15 +79,21 @@ void MainWindow::on_actionSelect_serial_device_triggered()
     }
 }
 
+void MainWindow::enableControls(bool bEnable) {
+    ui->command->setEnabled(bEnable);
+    ui->execute->setEnabled(bEnable);
+    ui->textBox->setEnabled(bEnable);
+}
 void MainWindow::updateConnection() {
 //    qDebug() << Q_FUNC_INFO;
 
     if (pComObject->isOpen()) {
-        int resCode = 0;
         qDebug() << "CommObject is open!";
 
+        // Send AT command to test if we are connected to a 8266 device...
         if (pComObject->atCommand("AT", nullptr, 100) != 0) {
             ui->textBox->append("Doesn't appear to be a 8266 device!");
+            enableControls(false);
             return;
         }
 
@@ -100,14 +106,9 @@ void MainWindow::updateConnection() {
         int mode = pComObject->getMode();
         qDebug() << "mode = " << mode;
 
-        ui->command->setEnabled(true);
-        ui->execute->setEnabled(true);
-        ui->textBox->setEnabled(true);
+        enableControls(true);
     } else {
-        ui->command->setEnabled(false);
-        ui->execute->setEnabled(false);
-        ui->textBox->setEnabled(false);
-
+        enableControls(false);
         ui->textBox->append("Unable to open comm device");
     }
 
