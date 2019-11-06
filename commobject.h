@@ -28,7 +28,7 @@ public:
     bool        open(QString portName = QString());
     void        close();
 
-    int         atCommand(QString command, QStringList * response = nullptr);
+    int         atCommand(QString command, QStringList * response = nullptr, int timeout = 5000);
 
     QString     getSerialPort() const;
     void        getVersion(QString & atVersion,
@@ -56,6 +56,7 @@ protected:
     bool                    bCmdResult        = false;
     QStringList             responseArray;
     QAtomicInteger<bool>    bResponseReceived = false;
+    QAtomicInteger<bool>    bReqTimedOut      = false;
 
 };
 

@@ -29,6 +29,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     pComObject = new CommObject(this);
     pComObject->open();
+
+    for (auto cmd : commandList) {
+        ui->command->addItem(cmd);
+    }
+
     updateConnection();
 }
 
@@ -41,8 +46,6 @@ MainWindow::~MainWindow()
 void MainWindow::on_execute_clicked()
 {
     QStringList resp;
-
-    qDebug() << Q_FUNC_INFO;
 
     QString command = ui->command->currentText();
 
@@ -63,8 +66,6 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionSelect_serial_device_triggered()
 {
-    qDebug() << Q_FUNC_INFO;
-
     portDialog  portDlg(this, pComObject->getSerialPort());
 
     if (portDlg.exec() == QDialog::Accepted) {
@@ -82,10 +83,12 @@ void MainWindow::updateConnection() {
 //    qDebug() << Q_FUNC_INFO;
 
     if (pComObject->isOpen()) {
+        int resCode = 0;
         qDebug() << "CommObject is open!";
 
-        for (auto cmd : commandList) {
-            ui->command->addItem(cmd);
+        if (pComObject->atCommand("AT", nullptr, 100) != 0) {
+            ui->textBox->append("Doesn't appear to be a 8266 device!");
+            return;
         }
 
         pComObject->getVersion(versionInfo[0], versionInfo[1], versionInfo[2]);

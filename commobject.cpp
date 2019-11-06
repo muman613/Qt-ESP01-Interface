@@ -20,10 +20,7 @@ CommObject::CommObject(QObject *parent)
         settings.endGroup();
     }
 
-#ifdef ENABLE_TIMER
     connect(&timer1, &QTimer::timeout, this, &CommObject::onTimeout);
-    timer1.start(5000);
-#endif
 }
 
 CommObject::~CommObject()
@@ -81,8 +78,10 @@ void CommObject::close()
     }
 }
 
-int CommObject::atCommand(QString command, QStringList * response)
+int CommObject::atCommand(QString command, QStringList * response, int timeout)
 {
+    QMutexLocker lock(&commMutex);
+
 //    qDebug() << Q_FUNC_INFO << command;
 
     int result = 0;
@@ -94,21 +93,35 @@ int CommObject::atCommand(QString command, QStringList * response)
     if (esp01) {
         esp01->sendCommand(command);
 
+        qDebug() << "Starting timeout timer";
+        timer1.setSingleShot(true);
+        timer1.start(timeout);
+
         // Wait for response to be returned...
-        while (bResponseReceived != true) {
+        while ((bResponseReceived != true) && (bReqTimedOut == false)) {
             QCoreApplication::processEvents();
             QThread::usleep(100);
         }
-        bResponseReceived = false;
 
-        if (bCmdResult) {
-//            displayResults(responseArray);
-            if (response) {
-                *response = responseArray;
+        if (bResponseReceived) {
+            bResponseReceived = false;
+
+            if (bCmdResult) {
+                if (response) {
+                    *response = responseArray;
+                }
+            } else {
+                result = -1;
             }
-        } else {
-            result = -1;
+        } else if (bReqTimedOut) {
+            qDebug() << "Request timed out";
+            bReqTimedOut = false;
+            result = -2;
         }
+
+        qDebug() << "Stopping timeout timer";
+        timer1.stop();
+        bReqTimedOut = bResponseReceived = false;
     } else {
         result = -10;
     }
@@ -125,7 +138,7 @@ void CommObject::getVersion(QString &atVersion, QString &sdkVersion, QString &co
     if (isOpen()) {
         QStringList response;
 
-        if (atCommand("AT+GMR", &response) == 0) {
+        if (atCommand("AT+GMR", &response, 100) == 0) {
             qDebug() << response;
             atVersion = response[1].section(':', 1);
             sdkVersion = response[2].section(':', 1);
@@ -141,7 +154,7 @@ int CommObject::getMode()
     if (isOpen()) {
         QStringList response;
 
-        if (atCommand("AT+CWMODE?", &response) == 0) {
+        if (atCommand("AT+CWMODE?", &response, 100) == 0) {
             qDebug() << response;
             mode = response[1].section(':', 1).toInt();
         }
@@ -166,10 +179,7 @@ void CommObject::onCommandResponse(bool status, QStringList response)
 
 void CommObject::onTimeout()
 {
-#if 0
-    qDebug() << "Scanning Wifi networks...";
-
-    atCommand("AT+CWLAP");
-#endif
+    qDebug() << Q_FUNC_INFO;
+    bReqTimedOut = true;
 }
 
