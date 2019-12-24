@@ -6,19 +6,20 @@
 #include "ui_mainwindow.h"
 #include "commobject.h"
 
-static QStringList commandList = {
-    "AT",
-    "AT+CIFSR",
-    "AT+CWJAP?",
-    "AT+GMR",
-    "AT+CIPSTATUS",
-    "AT+CWLAP",
-    "AT+CWMODE=1",
-    "AT+CWMODE=2",
-    "AT+CWMODE=3",
-    "AT+CWMODE?",
-    "AT+PING=\"sfgate.com\"",
-    "ATS"
+using QCommandPair       = QPair<QString, QString>;
+using QCommandPairVector = QVector<QCommandPair>;
+
+static QCommandPairVector commandVec = {
+    QCommandPair("Test AT startup",             "AT"),
+    QCommandPair("Check version info",          "AT+GMR"),
+    QCommandPair("Get local IP address",        "AT+CIFSR"),
+    QCommandPair("Query connected AP",          "AT+CWJAP?"),
+    QCommandPair("Get connection status",       "AT+CIPSTATUS"),
+    QCommandPair("List available APs",          "AT+CWLAP"),
+    QCommandPair("Set Station Mode",            "AT+CWMODE=1"),
+    QCommandPair("Set SoftAP Mode",             "AT+CWMODE=2"),
+    QCommandPair("Set SoftAP & Station Mode",   "AT+CWMODE=3"),
+    QCommandPair("Ping sfgate.com",             "AT+PING=\"sfgate.com\""),
 };
 
 MainWindow::MainWindow(QWidget *parent)
@@ -30,8 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
     pComObject = new CommObject(this);
     pComObject->open();
 
-    for (auto cmd : commandList) {
-        ui->command->addItem(cmd);
+    for (auto cmd : commandVec) {
+        ui->command->addItem(cmd.first);
     }
 
     updateConnection();
@@ -46,8 +47,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_execute_clicked()
 {
     QStringList resp;
-
-    QString command = ui->command->currentText();
+    QString command = commandVec[ui->command->currentIndex()].second;
 
     if (pComObject->atCommand(command, &resp) == 0) {
         for (auto line : resp) {
