@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     pComObject = new CommObject(this);
     pComObject->open();
 
-    for (auto cmd : commandVec) {
+    for (auto & cmd : commandVec) {
         ui->command->addItem(cmd.first);
     }
 
@@ -50,7 +50,7 @@ void MainWindow::on_execute_clicked()
     QString command = commandVec[ui->command->currentIndex()].second;
 
     if (pComObject->atCommand(command, &resp) == 0) {
-        for (auto line : resp) {
+        for (auto & line : resp) {
             ui->textBox->append(line);
         }
     } else {
@@ -122,7 +122,7 @@ void MainWindow::on_actionEnumerate_serial_devices_triggered()
 
     ui->textBox->append(QString(80, '-'));
 
-    for (auto port : serialPorts) {
+    for (auto & port : serialPorts) {
         QString line;
 
         line = QString("%1 %2 %3").arg(port.portName(), -15).arg(port.description(), -30).arg(port.manufacturer(), -20);
